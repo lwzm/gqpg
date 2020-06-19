@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -28,9 +27,5 @@ func main() {
 	})
 
 	http.Handle("/", graphqlHandler)
-	fmt.Println("Server is running on port 8080")
-	s := "1234"
-	fmt.Println(s[1:])
-	fmt.Println(s[:2])
 	http.ListenAndServe(":8080", nil)
 }
