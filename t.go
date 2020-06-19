@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/graphql-go/graphql"
+	_ "github.com/lib/pq"
 )
 
 var fooType = graphql.NewObject(graphql.ObjectConfig{
@@ -45,6 +46,7 @@ var QueryType = graphql.NewObject(graphql.ObjectConfig{
 	Fields: graphql.Fields{
 		"hello": helloField,
 		"test":  testField,
+		"fsm":   fsmField,
 	},
 })
 
