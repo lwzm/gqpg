@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/graphql-go/graphql"
 	"github.com/iancoleman/strcase"
 )
 
@@ -33,4 +34,28 @@ func buildQuery(conditions map[string]any) (string, []any) {
 		seq++
 	}
 	return clause, args
+}
+func buildPage(conditions map[string]any) (s string) {
+	for _, k := range []string{"offset", "limit"} {
+		if v, ok := conditions[k]; ok {
+			delete(conditions, k)
+			n := v.(int)
+			s += fmt.Sprintf(" %s %d ", k, n)
+		}
+	}
+	return
+}
+
+func withPage(org graphql.FieldConfigArgument) graphql.FieldConfigArgument {
+	a := graphql.FieldConfigArgument{}
+	a["offset"] = &graphql.ArgumentConfig{
+		Type: graphql.Int,
+	}
+	a["limit"] = &graphql.ArgumentConfig{
+		Type: graphql.Int,
+	}
+	for k, v := range org {
+		a[k] = v
+	}
+	return a
 }

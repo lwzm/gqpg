@@ -40,34 +40,38 @@ var fsmType = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
+var fsmArgs = graphql.FieldConfigArgument{
+	"id": &graphql.ArgumentConfig{
+		Type: graphql.Int,
+	},
+	"idLte": &graphql.ArgumentConfig{
+		Type: graphql.Int,
+	},
+	"idGte": &graphql.ArgumentConfig{
+		Type: graphql.Int,
+	},
+	"state": &graphql.ArgumentConfig{
+		Type: graphql.String,
+	},
+	"stateLte": &graphql.ArgumentConfig{
+		Type: graphql.String,
+	},
+	"stateGte": &graphql.ArgumentConfig{
+		Type: graphql.String,
+	},
+	"tsLt": &graphql.ArgumentConfig{
+		Type: graphql.DateTime,
+	},
+	"tsGt": &graphql.ArgumentConfig{
+		Type: graphql.DateTime,
+	},
+}
+
+var pageArgs = graphql.FieldConfigArgument{}
+
 var fsmField = &graphql.Field{
 	Type: fsmType,
-	Args: graphql.FieldConfigArgument{
-		"id": &graphql.ArgumentConfig{
-			Type: graphql.Int,
-		},
-		"idLte": &graphql.ArgumentConfig{
-			Type: graphql.Int,
-		},
-		"idGte": &graphql.ArgumentConfig{
-			Type: graphql.Int,
-		},
-		"state": &graphql.ArgumentConfig{
-			Type: graphql.String,
-		},
-		"stateLte": &graphql.ArgumentConfig{
-			Type: graphql.String,
-		},
-		"stateGte": &graphql.ArgumentConfig{
-			Type: graphql.String,
-		},
-		"tsLt": &graphql.ArgumentConfig{
-			Type: graphql.DateTime,
-		},
-		"tsGt": &graphql.ArgumentConfig{
-			Type: graphql.DateTime,
-		},
-	},
+	Args: fsmArgs,
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		clause, args := buildQuery(p.Args)
 		row := db.QueryRow("select id, state, ts from fsm where "+clause+" limit 1", args...)
@@ -76,5 +80,41 @@ var fsmField = &graphql.Field{
 			return nil, err
 		}
 		return fsm, nil
+	},
+}
+
+var fsmsField = &graphql.Field{
+	Type: graphql.NewList(fsmType),
+	Args: withPage(fsmArgs),
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		page := buildPage(p.Args)
+		clause, args := buildQuery(p.Args)
+		rows, err := db.Query("select id, state, ts from fsm where "+clause+page, args...)
+		if err != nil {
+			return nil, err
+		}
+		lst := []Fsm{}
+		fsm := Fsm{}
+		for rows.Next() {
+			if err := rows.Scan(&fsm.ID, &fsm.State, &fsm.Ts); err != nil {
+				return nil, err
+			}
+			lst = append(lst, fsm)
+		}
+		return lst, nil
+	},
+}
+
+var fsmsCount = &graphql.Field{
+	Type: graphql.Int,
+	Args: fsmArgs,
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		clause, args := buildQuery(p.Args)
+		row := db.QueryRow("select count(id) from fsm where "+clause, args...)
+		i := 0
+		if err := row.Scan(&i); err != nil {
+			return nil, err
+		}
+		return i, nil
 	},
 }

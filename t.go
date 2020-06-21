@@ -44,9 +44,11 @@ var testField = &graphql.Field{
 var QueryType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Query",
 	Fields: graphql.Fields{
-		"hello": helloField,
-		"test":  testField,
-		"fsm":   fsmField,
+		"hello":     helloField,
+		"test":      testField,
+		"fsm":       fsmField,
+		"fsms":      fsmsField,
+		"fsmsCount": fsmsCount,
 	},
 })
 
