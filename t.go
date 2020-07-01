@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/graphql-go/graphql"
-	_ "github.com/lib/pq"
 )
 
 var fooType = graphql.NewObject(graphql.ObjectConfig{

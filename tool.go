@@ -9,6 +9,8 @@ import (
 )
 
 var opsMap = map[string]string{
+	"eq":   "=",
+	"neq":  "!=",
 	"gt":   ">",
 	"lt":   "<",
 	"gte":  ">=",
@@ -20,7 +22,7 @@ type any = interface{}
 
 func buildQuery(conditions map[string]any) (string, []any) {
 	seq := 1
-	clause := "true"
+	clause := " where true"
 	args := []any{}
 	for k, v := range conditions {
 		key := strcase.ToSnake(k)
@@ -35,15 +37,24 @@ func buildQuery(conditions map[string]any) (string, []any) {
 	}
 	return clause, args
 }
-func buildPage(conditions map[string]any) (s string) {
+
+func buildQueryOne(conditions map[string]any) (string, []any) {
+	clause, args := buildQuery(conditions)
+	return clause + " limit 1", args
+}
+
+func buildQueryWithPage(conditions map[string]any) (string, []any) {
+	page := ""
 	for _, k := range []string{"offset", "limit"} {
 		if v, ok := conditions[k]; ok {
 			delete(conditions, k)
 			n := v.(int)
-			s += fmt.Sprintf(" %s %d ", k, n)
+			page += fmt.Sprintf(" %s %d ", k, n)
 		}
 	}
-	return
+	clause, args := buildQuery(conditions)
+	return clause + page, args
+
 }
 
 func withPage(org graphql.FieldConfigArgument) graphql.FieldConfigArgument {

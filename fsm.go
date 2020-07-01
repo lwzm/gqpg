@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/graphql-go/graphql"
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
@@ -73,8 +74,8 @@ var fsmField = &graphql.Field{
 	Type: fsmType,
 	Args: fsmArgs,
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		clause, args := buildQuery(p.Args)
-		row := db.QueryRow("select id, state, ts from fsm where "+clause+" limit 1", args...)
+		clause, args := buildQueryOne(p.Args)
+		row := db.QueryRow("select id, state, ts from fsm"+clause, args...)
 		fsm := Fsm{}
 		if err := row.Scan(&fsm.ID, &fsm.State, &fsm.Ts); err != nil {
 			return nil, err
@@ -87,9 +88,8 @@ var fsmsField = &graphql.Field{
 	Type: graphql.NewList(fsmType),
 	Args: withPage(fsmArgs),
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		page := buildPage(p.Args)
-		clause, args := buildQuery(p.Args)
-		rows, err := db.Query("select id, state, ts from fsm where "+clause+page, args...)
+		clause, args := buildQueryWithPage(p.Args)
+		rows, err := db.Query("select id, state, ts from fsm"+clause, args...)
 		if err != nil {
 			return nil, err
 		}
@@ -110,7 +110,7 @@ var fsmsCount = &graphql.Field{
 	Args: fsmArgs,
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		clause, args := buildQuery(p.Args)
-		row := db.QueryRow("select count(id) from fsm where "+clause, args...)
+		row := db.QueryRow("select count(id) from fsm"+clause, args...)
 		i := 0
 		if err := row.Scan(&i); err != nil {
 			return nil, err

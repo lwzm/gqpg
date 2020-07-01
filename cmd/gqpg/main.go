@@ -6,7 +6,6 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
-	_ "github.com/lib/pq"
 	"github.com/lwzm/gqpg"
 )
 
