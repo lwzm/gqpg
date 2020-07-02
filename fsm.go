@@ -17,7 +17,6 @@ func init() {
 		log.Fatal(err)
 	}
 	db = pg
-	// row := db.QueryRow("select id, state, ts, data from fsm where id < $1 limit 1", 2)
 }
 
 var fsmType = graphql.NewObject(graphql.ObjectConfig{
@@ -48,11 +47,17 @@ var fsmArgs = graphql.FieldConfigArgument{
 	"state": &graphql.ArgumentConfig{
 		Type: graphql.String,
 	},
+	"stateNeq": &graphql.ArgumentConfig{
+		Type: graphql.String,
+	},
 	"stateLte": &graphql.ArgumentConfig{
 		Type: graphql.String,
 	},
 	"stateGte": &graphql.ArgumentConfig{
 		Type: graphql.String,
+	},
+	"ts": &graphql.ArgumentConfig{
+		Type: graphql.DateTime,
 	},
 	"tsLt": &graphql.ArgumentConfig{
 		Type: graphql.DateTime,
@@ -67,7 +72,7 @@ var fsmField = &graphql.Field{
 	Args: fsmArgs,
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		clause, args := buildQueryOne(p.Args)
-		row := db.QueryRow("select id, state, ts from fsm"+clause, args...)
+		row := db.QueryRow("select id,state,ts from fsm"+clause, args...)
 		var i int
 		var s string
 		var t time.Time
@@ -84,10 +89,10 @@ var fsmField = &graphql.Field{
 
 var fsmsField = &graphql.Field{
 	Type: graphql.NewList(fsmType),
-	Args: withPage(fsmArgs),
+	Args: pagerize(fsmArgs),
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		clause, args := buildQueryWithPage(p.Args)
-		rows, err := db.Query("select id, state, ts from fsm"+clause, args...)
+		rows, err := db.Query("select id,state,ts from fsm"+clause, args...)
 		if err != nil {
 			return nil, err
 		}

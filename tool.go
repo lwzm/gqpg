@@ -19,7 +19,7 @@ var opsMap = map[string]string{
 }
 
 type any = interface{}
-type object map[string]any
+type object = map[string]any
 
 func buildQuery(conditions map[string]any) (string, []any) {
 	seq := 1
@@ -58,7 +58,7 @@ func buildQueryWithPage(conditions map[string]any) (string, []any) {
 
 }
 
-func withPage(org graphql.FieldConfigArgument) graphql.FieldConfigArgument {
+func pagerize(org graphql.FieldConfigArgument) graphql.FieldConfigArgument {
 	a := graphql.FieldConfigArgument{}
 	a["offset"] = &graphql.ArgumentConfig{
 		Type: graphql.Int,
