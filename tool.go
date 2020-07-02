@@ -19,6 +19,7 @@ var opsMap = map[string]string{
 }
 
 type any = interface{}
+type object map[string]any
 
 func buildQuery(conditions map[string]any) (string, []any) {
 	seq := 1

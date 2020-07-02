@@ -20,12 +20,6 @@ func init() {
 	// row := db.QueryRow("select id, state, ts, data from fsm where id < $1 limit 1", 2)
 }
 
-type Fsm struct {
-	ID    int
-	State string
-	Ts    time.Time
-}
-
 var fsmType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Fsm",
 	Fields: graphql.Fields{
@@ -68,19 +62,23 @@ var fsmArgs = graphql.FieldConfigArgument{
 	},
 }
 
-var pageArgs = graphql.FieldConfigArgument{}
-
 var fsmField = &graphql.Field{
 	Type: fsmType,
 	Args: fsmArgs,
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		clause, args := buildQueryOne(p.Args)
 		row := db.QueryRow("select id, state, ts from fsm"+clause, args...)
-		fsm := Fsm{}
-		if err := row.Scan(&fsm.ID, &fsm.State, &fsm.Ts); err != nil {
+		var i int
+		var s string
+		var t time.Time
+		if err := row.Scan(&i, &s, &t); err != nil {
 			return nil, err
 		}
-		return fsm, nil
+		return object{
+			"id":    i,
+			"state": s,
+			"ts":    t,
+		}, nil
 	},
 }
 
@@ -93,13 +91,19 @@ var fsmsField = &graphql.Field{
 		if err != nil {
 			return nil, err
 		}
-		lst := []Fsm{}
-		fsm := Fsm{}
+		lst := []object{}
+		var i int
+		var s string
+		var t time.Time
 		for rows.Next() {
-			if err := rows.Scan(&fsm.ID, &fsm.State, &fsm.Ts); err != nil {
+			if err := rows.Scan(&i, &s, &t); err != nil {
 				return nil, err
 			}
-			lst = append(lst, fsm)
+			lst = append(lst, object{
+				"id":    i,
+				"state": s,
+				"ts":    t,
+			})
 		}
 		return lst, nil
 	},
