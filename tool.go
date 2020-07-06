@@ -58,7 +58,7 @@ func buildQueryWithPage(conditions map[string]any) (string, []any) {
 
 }
 
-func pagerize(org graphql.FieldConfigArgument) graphql.FieldConfigArgument {
+func withPage(org graphql.FieldConfigArgument) graphql.FieldConfigArgument {
 	a := graphql.FieldConfigArgument{}
 	a["offset"] = &graphql.ArgumentConfig{
 		Type: graphql.Int,

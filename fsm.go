@@ -89,7 +89,7 @@ var fsmField = &graphql.Field{
 
 var fsmsField = &graphql.Field{
 	Type: graphql.NewList(fsmType),
-	Args: pagerize(fsmArgs),
+	Args: withPage(fsmArgs),
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		clause, args := buildQueryWithPage(p.Args)
 		rows, err := db.Query("select id,state,ts from fsm"+clause, args...)
